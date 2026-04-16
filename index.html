@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Vòng quay may mắn Spa</title>
+
+<style>
+body {
+    text-align: center;
+    font-family: Arial;
+    background: #8C6344;
+    color: white;
+}
+
+canvas {
+    margin-top: 20px;
+}
+
+button {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 18px;
+    background: #ffcc00;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: gray;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🎁 VÒNG QUAY MAY MẮN 🎁</h2>
+
+<canvas id="wheel" width="1000" height="1000"></canvas>
+<br>
+<button id="spinBtn">QUAY NGAY</button>
+
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const prizes = [
+    {text: "Voucher 100K", weight: 10, color:"#FF5733"},
+    {text: "Voucher 200K", weight: 10, color:"#33FF57"},
+    {text: "Gội đầu 160K", weight: 10, color:"#3357FF"},
+    {text: "Nước uống 50K", weight: 10, color:"#FF33A8"},
+    {text: "Chúc may mắn", weight: 50, color:"#AAAAAA"}
+];
+
+// Tạo danh sách theo tỷ lệ
+let weighted = [];
+prizes.forEach(p => {
+    for(let i=0;i<p.weight;i++) weighted.push(p);
+});
+
+let startAngle = 0;
+let arc = Math.PI * 2 / prizes.length;
+
+// Vẽ vòng quay
+function drawWheel() {
+    for(let i=0;i<prizes.length;i++) {
+        let angle = startAngle + i * arc;
+        ctx.beginPath();
+        ctx.fillStyle = prizes[i].color;
+        ctx.moveTo(500,500);
+        ctx.arc(500,500,500,angle,angle+arc);
+        ctx.fill();
+
+        ctx.save();
+        ctx.fillStyle = "#fff";
+        ctx.translate(500,500);
+        ctx.rotate(angle + arc/2);
+        ctx.textAlign = "right";
+        ctx.font = "20px Arial";
+        ctx.fillText(prizes[i].text, 480,10);
+        ctx.restore();
+    }
+}
+
+drawWheel();
+
+// chống quay lại (giả lập IP)
+const key = "da_quay_spa_2026";
+
+if(localStorage.getItem(key)){
+    document.getElementById("spinBtn").disabled = true;
+    alert("Bạn đã quay rồi!");
+}
+
+document.getElementById("spinBtn").onclick = function(){
+
+    if(localStorage.getItem(key)){
+        alert("Bạn đã quay rồi!");
+        return;
+    }
+
+    let selected = weighted[Math.floor(Math.random()*weighted.length)];
+    let index = prizes.findIndex(p => p.text === selected.text);
+
+    let spinAngle = 360 * 5 + (360 - index * (360/prizes.length));
+
+    canvas.style.transition = "transform 4s ease-out";
+    canvas.style.transform = "rotate(" + spinAngle + "deg)";
+
+    setTimeout(()=>{
+        alert("Kết quả: " + selected.text);
+        localStorage.setItem(key, "true");
+        document.getElementById("spinBtn").disabled = true;
+    },4000);
+};
+</script>
+
+</body>
+</html>
